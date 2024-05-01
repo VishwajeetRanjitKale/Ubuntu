@@ -1,0 +1,732 @@
+symbol table
+
+
+def generate_symbol_table(assembly_code):
+    symbol_table = {}
+
+    # First Pass: Collect labels and their addresses
+    current_address = None
+    for line in assembly_code:
+        parts = line.split()
+        if parts[0] == "START":
+            current_address = int(parts[1])
+        elif parts[0] != "END":
+            if(len(parts)==2):
+              if(parts[0]=="READ"):
+                symbol_table[parts[1]]="Not assigned"
+            elif(len(parts)==4):
+              symbol_table[parts[0]]=current_address
+            elif(len(parts)==3 and parts[1]=="DS"):
+              symbol_table[parts[0]]=current_address
+              current_address+=int(parts[2])-1
+            elif(len(parts)==3 and parts[1]=="DC"):
+              symbol_table[parts[0]]=current_address
+            current_address+=1
+
+
+    # Second Pass: Generate Symbol Table
+    print("Symbol Table:")
+    print("Label\t|\tAddress")
+    print("----------------------")
+    for label, address in symbol_table.items():
+        if label=="READ":
+          continue
+        print(f"{label}\t|\t{address}")
+
+# Assembly code
+assembly_code = [
+    "START 100",
+    "READ A",
+    "READ B",
+    "LOOP MOVER AREG, A",
+    "MOVER BREG, B",
+    "COMP BREG, ='2'",
+    "BC GT, LOOP",
+    "BACK SUB AREG, B",
+    "COMP AREG, ='5'",
+    "BC LT, BACK",
+    "STOP",
+    "A DS 1",
+    "print suyash",
+    "B DS 1",
+    "END"
+]
+
+# Generate symbol table
+generate_symbol_table(assembly_code)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+literal table
+
+
+def generate_literal_table(assembly_code):
+
+    ans=[]
+    literal_table = {}
+
+    # First Pass: Collect literals and their values
+    current_address = None
+    for line in assembly_code:
+        parts = line.split()
+        if parts[0] == "START":
+            current_address = int(parts[1])
+        elif parts[0] != "END" and parts[0]!='LTORG':
+            for part in parts:
+                if part.startswith("='"):
+                    literal = part.strip("='")
+                    literal_table[literal] = None
+            current_address += 1
+        elif parts[0]=='LTORG':
+           for literal in literal_table:
+              literal_table[literal] = current_address
+              current_address += 1
+           ans.append(literal_table)
+           literal_table={}
+           
+    for literal in literal_table:
+        if(literal_table[literal] == None):
+          literal_table[literal] = current_address
+          current_address += 1
+    ans.append(literal_table)
+    literal_table={}
+        
+    
+    # Second Pass: Generate Literal Table
+    print("Literal Table:")
+    print("Literal\t|\tValue")
+    print("----------------------")
+    for i in range(len(ans)):
+      for literal, value in ans[i].items():
+          print(f"{literal}\t|\t{value}")
+
+# Assembly code
+assembly_code = [
+    "START 200",
+    "READ X",
+    "READ Y",
+    "MOVER AREG, ='5'",
+    "MOVER BREG, ='6'",
+    "ADD AREG, BREG",
+    "LOOP MOVER CREG, X",
+    "ADD CREG, ='1'",
+    "COMP CREG, Y",
+    "BC LT, LOOP",
+    "LTORG",
+    "NEXT SUB AREG, ='1'",
+    "COMP AREG, Y",
+    "BC GT, NEXT",
+    "STOP",
+    "X DS 1",
+    "Y DS 1",
+    "END"
+]
+
+# Generate literal table
+generate_literal_table(assembly_code)
+
+
+
+
+
+
+
+
+
+
+
+
+pool table
+
+
+def generate_literal_table(assembly_code):
+
+    ans=[]
+    idx=0
+    ans.append(idx)
+    literal_table={}
+
+    # First Pass: Collect literals and their values
+    current_address = None
+    for line in assembly_code:
+        parts = line.split()
+        if parts[0] == "START":
+            current_address = int(parts[1])
+        elif parts[0] != "END" and parts[0]!='LTORG':
+            for part in parts:
+                if part.startswith("='"):
+                    literal = part.strip("='")
+                    literal_table[literal] = None
+            current_address += 1
+        elif parts[0]=='LTORG':
+           for literal in literal_table:
+              literal_table[literal] = current_address
+              current_address += 1
+              idx+=1
+           ans.append(idx)
+           literal_table={}
+           
+    for literal in literal_table:
+        if(literal_table[literal] == None):
+          literal_table[literal] = current_address
+          current_address += 1
+          idx+=1
+    ans.append(idx)
+    literal_table={}
+        
+    
+    # Second Pass: Generate Literal Table
+    print("Pool Table:")
+    print("Index")
+    print("----------------------")
+    for i in range(len(ans)):
+      print(ans[i])
+
+# Assembly code
+assembly_code = [
+    "START 200",
+    "READ X",
+    "READ Y",
+    "MOVER AREG, ='5'",
+    "MOVER BREG, ='6'",
+    "ADD AREG, BREG",
+    "LOOP MOVER CREG, X",
+    "ADD CREG, ='1'",
+    "COMP CREG, Y",
+    "BC LT, LOOP",
+    "LTORG",
+    "NEXT SUB AREG, ='1'",
+    "COMP AREG, Y",
+    "BC GT, NEXT",
+    "STOP",
+    "X DS 1",
+    "Y DS 1",
+    "END"
+]
+
+# Generate literal table
+generate_literal_table(assembly_code)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+mnt mdt aashi
+
+
+
+file = open("INPUT CODE 6.txt")
+lines= file.readlines()
+tlines = []
+for line in lines:
+  tokens = line.split()
+  tlines.append(tokens)
+MNTP= 0
+MDTP = 0
+#Macro name, MDT pointer
+MNT = []
+#Definition
+MDT = []
+ALAA = []
+#[[arg1, #1,]]
+ALA = []
+
+def formatString(word):
+    return word.split(',')[0]
+
+def prepALA(parameters):
+  d = {}
+  for i in range(len(parameters)):
+    d[parameters[i]] = "#"+str(i+1)
+  #print(d)
+  return d
+
+def formatLine(ALA, line):
+  parameters = list(ALA.keys())
+  for i in range(len(line)):
+    if(line[i] in parameters):
+      line[i] = ALA[line[i]]
+  return (line)
+i = 0
+n = len(tlines)
+for line in tlines:
+    for i in range(len(line)):
+        line[i] = formatString(line[i])
+i=0
+ALAPointer = 0
+while(i < n):
+  line = tlines[i]
+  if(line[0] == 'MACRO'):
+    MNT.append([line[1], MDTP])
+    MDT.append(line)
+    MDTP+=1
+    ALA = prepALA(line[2:])
+    ALAA.append(ALA)
+    ALAPointer +=1
+    j = i+1
+    line = tlines[j]
+    while(j < n and line[0] != 'MEND'):
+      j+=1
+      line = tlines[j]
+      l = formatLine(ALA, line)
+      MDT.append(l)
+      MDTP+=1
+    i = j
+  elif(line[0] == 'MEND'):
+    i+=1
+    MDTP+=1
+    MNTP+=1
+  else:
+    i+=1
+
+print("MNT")
+for i in MNT:
+    print(i)
+print("\nMDT")
+for i in MDT:
+    print(i)
+
+
+
+
+
+
+
+
+
+intermediate 
+
+
+def IS(word):
+  answer="("
+  if(word=="STOP"):
+    answer+=("IS,00)")   
+  elif(word=="ADD"):
+    answer+=("IS,01)")   
+  elif(word=="SUB"):
+    answer+=("IS,02)")   
+  elif(word=="MUL"):
+    answer+=("IS,03)")   
+  elif(word=="MOVER"):
+    answer+=("IS,04)")   
+  elif(word=="MOVEM"):
+    answer+=("IS,05)")   
+  elif(word=="COMP"):
+    answer+=("IS,06)")   
+  elif(word=="BC"):
+    answer+=("IS,07)")   
+  elif(word=="DIV"):
+    answer+=("IS,08)")   
+  elif(word=="READ"):
+    answer+=("IS,09)")   
+  elif(word=="PRINT"):
+    answer+=("IS,10)")
+  else:
+    return DL(word)
+  return answer
+
+def DL(word):
+  answer="("
+  if(word=="DS"):
+    answer+=("DL,01)")
+  elif(word=="DC"):
+    answer+=("DL,02)")
+  else:
+    return ""
+  return answer
+
+def AD(word):
+  answer="("
+  if(word=="START"):
+    answer+=("AD,01)")
+  elif(word=="END"):
+    answer+=("AD,01)")
+  elif(word=="ORIGIN"):
+    answer+=("AD,01)")
+  elif(word=="EQU"):
+    answer+=("AD,01)")
+  elif(word=="LTORG"):
+    answer+=("AD,01)")
+  return answer
+
+def RG(word):
+  answer="(RG,"
+  if(word=="AREG,"):
+    answer+=("1)")
+  elif(word=="BREG,"):
+    answer+=("2)")
+  elif(word=="CREG,"):
+    answer+=("3)")
+  else:
+    return CC(word)
+  return answer
+
+def CC(word):
+  answer=""
+  if(word=="EQ,"):
+    answer+=("(CC,1)")
+  elif(word=="LT,"):
+    answer+=("(CC,2)")
+  elif(word=="GT,"):
+    answer+=("(CC,3)")
+  elif(word=="NE,"):
+    answer+=("(CC,4)")
+  elif(word=="LE,"):
+    answer+=("(CC,5)")
+  elif(word=="GE,"):
+    answer+=("(CC,6)")
+  elif(word=="ANY,"):
+    answer+=("(CC,7)")
+
+  return answer
+  
+def IC(assembly_code):
+  ST=[]
+  LT=[]
+  PT=0
+  for line in assembly_code:
+    parts=line.split()
+    answer=""
+    if(len(parts)==1):
+        if(parts[0]=="STOP"):
+          answer+=(IS(parts[0]))
+        else:
+          answer+=(AD(parts[0]))
+    elif(len(parts)==2):
+          if(parts[0]=="START"):
+            answer+=(DL(parts[0]))
+            answer+=("(C,")
+            answer+=(parts[1])
+            answer+=(")")
+            ADD=int(parts[1])
+          else:
+            answer+=(IS(parts[0]))
+            if parts[1] in ST:
+              answer+=("(S,")
+              answer+=(ST.index(parts[1]))
+            else:
+              answer+=("(")
+              answer+=(parts[1])
+              ST+=(parts[1])
+              answer+=(")")
+    elif(len(parts)==3):
+         answer+=(IS(parts[0]))
+         answer+=(RG(parts[1]))
+         if(parts[2]=="AREG" or parts[2]=="BREG" or parts[2]=="CREG"):
+          parts[2]+=","
+          answer+=RG(parts[2])
+         else:
+          if(parts[2].startswith("='")):
+           if( parts[2] in LT):
+              answer+=("(L,")
+              answer+=(LT.index(parts[2]))
+              answer+=(")")
+           else:
+              LT+=(parts[2])
+              PT+=1
+              answer+=("(L,")
+              answer+=(str(PT))
+              answer+=(")")
+          elif(parts[1]=="DS" or parts[1]=="DC"):
+              answer+=("(S,")
+              answer+=(str(ST.index(parts[0])))
+              answer+=(")")
+              answer+=(DL(parts[1]))
+              answer+=("(C,")
+              answer+=(parts[2])
+              answer+=(")")
+          else:
+           if parts[2] in ST:
+              answer+=("(S,")
+              answer+=(str(ST.index(parts[2])))
+              answer+=(")")
+           else:
+              answer+=("(")
+              answer+=(parts[2])
+              ST.append(parts[2])
+              answer+=(")")
+        
+    elif(len(parts)==4):
+         ST.append(parts[0])
+         answer+=(IS(parts[1]))
+         answer+=(RG(parts[2]))
+         if(parts[3].startswith("='")):
+           if( parts[3] in LT):
+              answer+=("(L,")
+              answer+=(LT.index(parts[3]))
+              answer+=(")")
+           else:
+              LT.append(parts[3])
+              PT+=1
+              answer+=("(L,")
+              answer+=(str(PT))
+              answer+=(")")
+         else:
+           if parts[3] in ST:
+              answer+=("(S,")
+              answer+=(str(ST.index(parts[3])))
+           else:
+              answer+=("(S,")
+              answer+=(parts[3])
+              ST.append(parts[3])
+         answer+=(")")
+    print(answer)
+        
+         
+
+assembly_code = [
+    "START 200",
+    "READ X",
+    "READ Y",
+    "MOVER AREG, ='5'",
+    "MOVER BREG, ='6'",
+    "ADD AREG, BREG",
+    "LOOP MOVER CREG, X",
+    "ADD CREG, ='1'",
+    "COMP CREG, Y",
+    "BC LT, LOOP",
+    "LTORG",
+    "NEXT SUB AREG, ='1'",
+    "COMP AREG, Y",
+    "BC GT, NEXT",
+    "STOP",
+    "X DS 1",
+    "Y DS 1",
+    "END"
+]
+
+# Generate literal table
+IC(assembly_code)
+
+
+
+
+
+
+
+
+
+3 address code
+
+
+
+import java.util.*;
+
+public class Main {
+
+    private List<String[]> code;
+    private int tempCount;
+
+    public Main() {
+        code = new ArrayList<>();
+        tempCount = 0;
+    }
+
+    public String newTemp() {
+        String tempName = "t" + tempCount;
+        tempCount++;
+        return tempName;
+    }
+
+    public void genCode(String op, String arg1, String arg2, String result) {
+        String[] instruction = {op, arg1, arg2, result};
+        code.add(instruction);
+    }
+
+    public String infixToPostfix(String expression) {
+        Map<Character, Integer> precedence = new HashMap<>();
+        precedence.put('+', 1);
+        precedence.put('-', 1);
+        precedence.put('*', 2);
+        precedence.put('/', 2);
+        precedence.put('^', 3);
+
+        Stack<Character> stack = new Stack<>();
+        StringBuilder postfix = new StringBuilder();
+
+        String[] tokens = expression.split("\\s+");
+
+        for (String token : tokens) {
+            char ch = token.charAt(0);
+
+            if (Character.isDigit(ch) || Character.isLetter(ch)) {
+                postfix.append(token).append(" ");
+            } else if (ch == '(') {
+                stack.push(ch);
+            } else if (ch == ')') {
+                while (!stack.isEmpty() && stack.peek() != '(') {
+                    postfix.append(stack.pop()).append(" ");
+                }
+                stack.pop(); // Discard '('
+            } else {
+                while (!stack.isEmpty() && precedence.getOrDefault(stack.peek(), 0) >= precedence.getOrDefault(ch, 0)) {
+                    postfix.append(stack.pop()).append(" ");
+                }
+                stack.push(ch);
+            }
+        }
+
+        while (!stack.isEmpty()) {
+            postfix.append(stack.pop()).append(" ");
+        }
+
+        return postfix.toString().trim();
+    }
+
+    public String generateExpressionCode(String expression) {
+        String postfixExpression = infixToPostfix(expression);
+        String[] tokens = postfixExpression.split("\\s+");
+        Stack<String> stack = new Stack<>();
+
+        for (String token : tokens) {
+            char ch = token.charAt(0);
+
+            if (Character.isDigit(ch) || Character.isLetter(ch)) {
+                stack.push(token);
+            } else {
+                String op = token;
+                String arg2 = stack.pop();
+                String arg1 = stack.pop();
+                String result = newTemp();
+                genCode(op, arg1, arg2, result);
+                stack.push(result);
+            }
+        }
+
+        return stack.pop();
+    }
+
+    public String displayReadableCode() {
+        StringBuilder readableCode = new StringBuilder();
+
+        for (String[] instruction : code) {
+            String readableInstruction = instruction[3] + " = " + instruction[1] + " " + instruction[0] + " " + instruction[2];
+            readableCode.append(readableInstruction).append("\n");
+        }
+
+        return readableCode.toString();
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the expression: ");
+        String expression = scanner.nextLine();
+        Main tac = new Main();
+        String result = tac.generateExpressionCode(expression);
+        System.out.println("\nReadable code:");
+        System.out.println(tac.displayReadableCode());
+    }
+}
+
+
+
+
+
+
+
+
+
+expression 
+
+
+
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+// Function prototypes
+int yylex(void);
+void yyerror(const char *);
+
+// Define YYSTYPE as a double
+#define YYSTYPE double
+
+%}
+
+%token NUM
+
+%left '+' '-'
+%left '*' '/'
+
+%%
+
+expression:  
+expr 
+{
+	printf("Result: %.2f\n", $1); 
+ 	return 0;
+}
+    ;
+    
+expr: expr '+' expr     { $$ = $1 + $3; }
+    | expr '-' expr     { $$ = $1 - $3; }
+    | expr '*' expr     { $$ = $1 * $3; }
+    | expr '/' expr     { $$ = $1 / $3; }
+    | '(' expr ')'      { $$ = $2; }
+    | NUM               { $$ = $1; }
+    ;
+
+
+%%
+
+int yylex() {
+    int c;
+    do {
+        c = getchar();
+    } while (c == ' ' || c == '\t');
+    if (isdigit(c) || c == '.') {
+        ungetc(c, stdin);
+        scanf("%lf", &yylval);
+        return NUM;
+    }
+    return c;
+}
+
+void yyerror(const char *s) {
+    fprintf(stderr, "%s\n", s);
+}
+
+int main() {
+printf("\nEnter Any Arithmetic Expression :");
+    yyparse();
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
